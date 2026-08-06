@@ -44,15 +44,12 @@ python -m http.server 8000
 
 브라우저 탭을 2개 이상 열어서 한쪽에서 곡을 추가/스킵/일시정지했을 때 다른 쪽에도 반영되는지 확인하세요.
 
-## 4. GitHub Pages 배포 (GitHub Actions)
-
-이 저장소에는 `.github/workflows/deploy.yml`이 포함돼 있어 `main` 브랜치에 push할 때마다 자동으로 배포됩니다.
+## 4. GitHub Pages 배포
 
 1. GitHub에서 새 저장소 생성 (Public 또는 Private 모두 가능, Private면 Pages는 GitHub Pro/Team 이상 필요)
 2. 이 폴더를 그 저장소에 push
-3. 저장소 **Settings → Pages → Build and deployment**에서 Source가 "GitHub Actions"로 되어 있는지 확인 (보통 기본값)
-4. **Actions** 탭에서 `Deploy static content to Pages` 워크플로가 실행되어 초록 체크가 뜨면 완료
-5. `https://<계정>.github.io/<저장소명>/` 에서 접속 가능
+3. 저장소 **Settings → Pages → Build and deployment → Source**를 "Deploy from a branch"로 선택, 브랜치는 `master` / `/(root)` 선택 → Save
+4. 1~2분 후 `https://<계정>.github.io/<저장소명>/` 에서 접속 가능
 
 ## 데이터 구조 (Realtime Database)
 
