@@ -77,15 +77,18 @@ async function createPlayer(initialVideoId) {
 }
 
 function onPlayerStateChange(event) {
+  // syncPlayback()이 스스로 seekTo/playVideo/pauseVideo/loadVideoById를 호출해서 생긴 이벤트는 무시.
+  // 드리프트 보정으로 영상 끝 근처까지 seekTo했을 때 플레이어가 곧장 ENDED를 쏘는 경우가 있는데,
+  // 이걸 자연 종료로 오인해 곡을 강제로 넘기면 안 되므로 ENDED 판정보다 먼저 걸러낸다.
+  if (syncing) return;
+
   if (event.data === YT.PlayerState.ENDED && latestNowPlaying && latestNowPlaying.queueId) {
     advanceToNext(latestNowPlaying.queueId);
     return;
   }
 
-  // syncPlayback()이 스스로 seekTo/playVideo/pauseVideo를 호출해서 생긴 이벤트는 무시.
   // 그 외의 PLAYING/PAUSED 전환은 사용자가 유튜브 플레이어를 직접 조작한 것
   // (탐색 바로 구간 이동, 네이티브 재생/일시정지 버튼 등)이므로 공유 상태로 반영한다.
-  if (syncing) return;
   if (event.data === YT.PlayerState.PLAYING) {
     reportLocalPlaybackChange(true);
   } else if (event.data === YT.PlayerState.PAUSED) {
@@ -278,14 +281,16 @@ async function addSongFromInput() {
   input.value = "";
 
   const title = await fetchTitle(videoId);
-  const newRef = push(queueRef);
-  await set(newRef, { videoId, title, addedAt: serverNow() });
 
-  // 대기열이 비어 있던 상태(idle)면 바로 재생으로 승격
+  // 큐에 먼저 넣었다가 idle이면 승격 후 지우는 방식은, 승격과 삭제 사이의 짧은 창에
+  // advanceToNext가 같은 곡을 큐에서 다시 집어가 처음부터 재시작시키는 레이스가 있었다.
+  // 그래서 이 곡이 큐와 nowPlaying 양쪽에 동시에 존재하는 순간이 아예 없도록,
+  // idle일 때만 큐에 쓰지 않고 nowPlaying으로 바로 승격한다.
+  const queueId = push(queueRef).key;
   const result = await runTransaction(nowPlayingRef, (current) => {
     if (current && current.state && current.state !== "idle") return; // 이미 뭔가 재생 중
     return {
-      queueId: newRef.key,
+      queueId,
       videoId,
       title,
       state: "playing",
@@ -294,8 +299,8 @@ async function addSongFromInput() {
     };
   });
 
-  if (result.committed) {
-    await remove(newRef);
+  if (!result.committed) {
+    await set(ref(db, `queue/${queueId}`), { videoId, title, addedAt: serverNow() });
   }
 }
 

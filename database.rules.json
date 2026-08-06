@@ -21,7 +21,7 @@
     "presence": {
       ".read": true,
       "$clientId": {
-        ".write": true,
+        ".write": "auth != null && auth.uid === $clientId",
         ".validate": "newData.isBoolean() && newData.val() == true"
       }
     },
@@ -29,7 +29,7 @@
       ".read": true,
       "$queueId": {
         "$clientId": {
-          ".write": true,
+          ".write": "auth != null && (auth.uid === $clientId || !newData.exists())",
           ".validate": "newData.isBoolean() && newData.val() == true"
         }
       }
