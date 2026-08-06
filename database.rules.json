@@ -1,0 +1,18 @@
+{
+  "rules": {
+    "queue": {
+      ".read": true,
+      ".write": true,
+      "$songId": {
+        ".validate": "newData.hasChildren(['videoId', 'title', 'addedAt']) && newData.child('videoId').isString() && newData.child('videoId').val().length == 11"
+      }
+    },
+    "nowPlaying": {
+      ".read": true,
+      ".write": true
+    },
+    "$other": {
+      ".validate": false
+    }
+  }
+}

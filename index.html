@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>같이 듣기</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="join-overlay">
+    <div id="join-card">
+      <h1>같이 듣기</h1>
+      <p>브라우저 자동재생 제한 때문에 한 번 눌러야 재생이 시작돼요.</p>
+      <button id="join-btn">참여하기</button>
+    </div>
+  </div>
+
+  <main>
+    <h1>같이 듣기 🎧</h1>
+
+    <div id="player"></div>
+
+    <div id="now-playing-info">
+      <span id="now-playing-title">재생 중인 곡 없음</span>
+    </div>
+
+    <div id="controls">
+      <button id="play-pause-btn" disabled>재생/일시정지</button>
+      <button id="skip-btn" disabled>다음 곡</button>
+    </div>
+
+    <form id="add-form">
+      <input id="link-input" type="text" placeholder="유튜브 링크를 붙여넣으세요" autocomplete="off" />
+      <button type="submit">추가</button>
+    </form>
+
+    <h2>대기열</h2>
+    <ol id="queue-list"></ol>
+  </main>
+
+  <script src="app.js" type="module"></script>
+</body>
+</html>
