@@ -18,6 +18,8 @@
   <main>
     <h1>같이 듣기 🎧</h1>
 
+    <div id="viewer-count">현재 접속자 수 확인 중...</div>
+
     <div id="layout">
       <div id="main-col">
         <div id="player"></div>
@@ -28,7 +30,7 @@
 
         <div id="controls">
           <button id="play-pause-btn" disabled>재생/일시정지</button>
-          <button id="skip-btn" disabled>다음 곡</button>
+          <button id="skip-btn" disabled>다음 곡 투표</button>
         </div>
 
         <form id="add-form">
@@ -53,5 +55,6 @@
 
   <script src="app.js" type="module"></script>
   <script src="chat.js" type="module"></script>
+  <script src="presence.js" type="module"></script>
 </body>
 </html>

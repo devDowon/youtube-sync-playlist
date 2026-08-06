@@ -24,6 +24,12 @@ main {
   padding: 24px 16px 64px;
 }
 
+#viewer-count {
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin-bottom: 16px;
+}
+
 #layout {
   display: grid;
   grid-template-columns: 1fr 300px;

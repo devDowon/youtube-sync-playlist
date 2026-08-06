@@ -18,6 +18,22 @@
         ".validate": "newData.hasChildren(['text', 'sentAt']) && newData.child('text').isString() && newData.child('text').val().length > 0 && newData.child('text').val().length <= 300 && newData.child('sentAt').isNumber()"
       }
     },
+    "presence": {
+      ".read": true,
+      "$clientId": {
+        ".write": true,
+        ".validate": "newData.isBoolean() && newData.val() == true"
+      }
+    },
+    "skipVotes": {
+      ".read": true,
+      "$queueId": {
+        "$clientId": {
+          ".write": true,
+          ".validate": "newData.isBoolean() && newData.val() == true"
+        }
+      }
+    },
     "$other": {
       ".validate": false
     }

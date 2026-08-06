@@ -186,7 +186,7 @@ async function togglePlayPause() {
   }
 }
 
-async function advanceToNext(expectedQueueId) {
+export async function advanceToNext(expectedQueueId) {
   const snap = await get(query(queueRef, orderByKey(), limitToFirst(1)));
   let nextEntry = null;
   snap.forEach((child) => {
@@ -210,8 +210,11 @@ async function advanceToNext(expectedQueueId) {
     };
   });
 
-  if (result.committed && nextEntry) {
-    await remove(ref(db, `queue/${nextEntry.id}`));
+  if (result.committed) {
+    await remove(ref(db, `skipVotes/${expectedQueueId}`));
+    if (nextEntry) {
+      await remove(ref(db, `queue/${nextEntry.id}`));
+    }
   }
 }
 
@@ -281,19 +284,16 @@ async function addSongFromInput() {
 function renderNowPlaying(np) {
   const titleEl = document.getElementById("now-playing-title");
   const playPauseBtn = document.getElementById("play-pause-btn");
-  const skipBtn = document.getElementById("skip-btn");
 
   if (!np || np.state === "idle" || !np.videoId) {
     titleEl.textContent = "재생 중인 곡 없음";
     playPauseBtn.disabled = true;
-    skipBtn.disabled = true;
     playPauseBtn.textContent = "재생";
     return;
   }
 
   titleEl.textContent = np.title || np.videoId;
   playPauseBtn.disabled = false;
-  skipBtn.disabled = false;
   playPauseBtn.textContent = np.state === "playing" ? "일시정지" : "재생";
 }
 
@@ -335,12 +335,6 @@ document.getElementById("join-btn").addEventListener("click", async () => {
 });
 
 document.getElementById("play-pause-btn").addEventListener("click", togglePlayPause);
-
-document.getElementById("skip-btn").addEventListener("click", () => {
-  if (latestNowPlaying && latestNowPlaying.queueId) {
-    advanceToNext(latestNowPlaying.queueId);
-  }
-});
 
 document.getElementById("add-form").addEventListener("submit", (e) => {
   e.preventDefault();

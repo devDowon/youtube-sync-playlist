@@ -57,14 +57,18 @@ python -m http.server 8000
 /queue/{pushId}: { videoId, title, addedAt }
 /nowPlaying: { queueId, videoId, title, state: "playing"|"paused"|"idle", startedAt, positionAtStart }
 /chat/{pushId}: { text, sentAt }
+/presence/{clientId}: true
+/skipVotes/{queueId}/{clientId}: true
 ```
 
 - 채팅은 별도 로그인/식별 없이 모두 "익명"으로 표시됩니다. 발신자를 구분하지 않습니다.
-- 채팅을 추가하면서 `database.rules.json`에 `chat` 경로 규칙이 새로 생겼습니다. **Firebase 콘솔의 Realtime Database → Rules 탭에 이 파일 내용을 다시 붙여넣고 "게시(Publish)"** 하지 않으면 기존 배포에는 채팅 쓰기가 거부됩니다(기존 재생 동기화 기능은 영향 없음).
+- `presence`는 각 브라우저 탭이 페이지에 접속해 있는 동안만 존재하는 항목입니다. `onDisconnect()`로 등록해두기 때문에 탭을 닫거나 연결이 끊기면 Firebase가 자동으로 지웁니다. 같은 사람이 탭을 여러 개 열면 그만큼 접속자 수에 중복으로 잡힙니다.
+- "다음 곡" 버튼은 즉시 스킵하지 않고 **투표**로 동작합니다. 현재 접속자 수의 과반(`floor(접속자수/2) + 1`)이 투표하면 자동으로 다음 곡으로 넘어가고, 그 순간 해당 곡의 `skipVotes` 기록은 삭제됩니다. 여러 클라이언트가 동시에 과반 조건을 감지해도 `nowPlaying`에 대한 Firebase transaction으로 중복 스킵을 막습니다.
+- `database.rules.json`에 `chat`/`presence`/`skipVotes` 경로 규칙이 있습니다. **Firebase 콘솔의 Realtime Database → Rules 탭에 이 파일 내용을 다시 붙여넣고 "게시(Publish)"** 하지 않으면 새로 추가된 기능들의 쓰기가 거부됩니다(기존 재생 동기화 기능은 영향 없음).
 
 - `state`가 `idle`일 때 새 곡을 추가하면 대기열을 거치지 않고 바로 재생됩니다.
 - 재생 위치 동기화는 폴링이 아니라 `nowPlaying` 값 변경을 실시간 구독(`onValue`)해서 이루어지며, 서버 시각(`​.info/serverTimeOffset`)을 기준으로 각자 위치를 계산합니다.
-- 곡이 끝나거나 "다음 곡"을 눌렀을 때 여러 사람이 동시에 눌러도 중복 스킵되지 않도록 Firebase transaction으로 처리합니다.
+- 곡이 끝나거나 스킵 투표가 과반을 넘었을 때 여러 사람의 클라이언트가 동시에 다음 곡으로 넘기려 해도 중복 스킵되지 않도록 Firebase transaction으로 처리합니다.
 
 ## 알아둘 점
 
