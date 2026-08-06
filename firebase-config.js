@@ -3,6 +3,7 @@
 export const firebaseConfig = {
   apiKey: "AIzaSyC9DEgkaP4oUSwta4adGRwu2Z7gf3_IYSY",
   authDomain: "sync-playlist-e03f7.firebaseapp.com",
+  databaseURL: "https://sync-playlist-e03f7-default-rtdb.firebaseio.com",
   projectId: "sync-playlist-e03f7",
   storageBucket: "sync-playlist-e03f7.firebasestorage.app",
   messagingSenderId: "607054973111",
