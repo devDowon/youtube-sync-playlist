@@ -11,6 +11,13 @@
       ".read": true,
       ".write": true
     },
+    "chat": {
+      ".read": true,
+      ".write": true,
+      "$messageId": {
+        ".validate": "newData.hasChildren(['text', 'sentAt']) && newData.child('text').isString() && newData.child('text').val().length > 0 && newData.child('text').val().length <= 300 && newData.child('sentAt').isNumber()"
+      }
+    },
     "$other": {
       ".validate": false
     }

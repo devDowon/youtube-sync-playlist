@@ -1,7 +1,5 @@
-import { firebaseConfig } from "./firebase-config.js";
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
+import { db } from "./firebase-init.js";
 import {
-  getDatabase,
   ref,
   onValue,
   push,
@@ -14,9 +12,6 @@ import {
   limitToFirst,
   get,
 } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js";
-
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
 
 const queueRef = ref(db, "queue");
 const nowPlayingRef = ref(db, "nowPlaying");

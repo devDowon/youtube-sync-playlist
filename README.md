@@ -56,7 +56,11 @@ python -m http.server 8000
 ```
 /queue/{pushId}: { videoId, title, addedAt }
 /nowPlaying: { queueId, videoId, title, state: "playing"|"paused"|"idle", startedAt, positionAtStart }
+/chat/{pushId}: { text, sentAt }
 ```
+
+- 채팅은 별도 로그인/식별 없이 모두 "익명"으로 표시됩니다. 발신자를 구분하지 않습니다.
+- 채팅을 추가하면서 `database.rules.json`에 `chat` 경로 규칙이 새로 생겼습니다. **Firebase 콘솔의 Realtime Database → Rules 탭에 이 파일 내용을 다시 붙여넣고 "게시(Publish)"** 하지 않으면 기존 배포에는 채팅 쓰기가 거부됩니다(기존 재생 동기화 기능은 영향 없음).
 
 - `state`가 `idle`일 때 새 곡을 추가하면 대기열을 거치지 않고 바로 재생됩니다.
 - 재생 위치 동기화는 폴링이 아니라 `nowPlaying` 값 변경을 실시간 구독(`onValue`)해서 이루어지며, 서버 시각(`​.info/serverTimeOffset`)을 기준으로 각자 위치를 계산합니다.
