@@ -9,8 +9,6 @@ import {
   runTransaction,
   query,
   orderByKey,
-  limitToFirst,
-  get,
 } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js";
 
 const queueRef = ref(db, "queue");
@@ -96,7 +94,13 @@ function onPlayerStateChange(event) {
 }
 
 async function reportLocalPlaybackChange(isPlaying) {
-  if (!latestNowPlaying || latestNowPlaying.state === "idle" || !player) return;
+  if (
+    !latestNowPlaying ||
+    latestNowPlaying.state === "idle" ||
+    latestNowPlaying.state === "advancing" ||
+    !player
+  )
+    return;
   const pos = Math.max(0, player.getCurrentTime());
   await update(nowPlayingRef, {
     state: isPlaying ? "playing" : "paused",
@@ -116,7 +120,7 @@ function getCurrentVideoId() {
 // --- 재생 동기화 ---
 function targetPosition(np) {
   if (!np || np.state === "idle") return 0;
-  if (np.state === "paused") return np.positionAtStart || 0;
+  if (np.state === "paused" || np.state === "advancing") return np.positionAtStart || 0;
   return (np.positionAtStart || 0) + (serverNow() - np.startedAt) / 1000;
 }
 
@@ -127,6 +131,10 @@ function syncPlayback(np) {
     player.stopVideo();
     return;
   }
+
+  // 다음 곡으로 넘어가는 아주 짧은 전환 구간: 곧 실제 상태로 갱신되므로
+  // 플레이어를 건드리지 않고 다음 업데이트를 기다린다 (매 스킵마다 깜빡이는 것 방지).
+  if (np.state === "advancing") return;
 
   const target = Math.max(0, targetPosition(np));
 
@@ -176,7 +184,7 @@ function checkPausedSeek(np) {
 // --- 컨트롤 ---
 async function togglePlayPause() {
   const np = latestNowPlaying;
-  if (!np || np.state === "idle") return;
+  if (!np || np.state === "idle" || np.state === "advancing") return;
 
   if (np.state === "playing") {
     const pos = Math.max(0, targetPosition(np));
@@ -187,35 +195,46 @@ async function togglePlayPause() {
 }
 
 export async function advanceToNext(expectedQueueId) {
-  const snap = await get(query(queueRef, orderByKey(), limitToFirst(1)));
-  let nextEntry = null;
-  snap.forEach((child) => {
-    nextEntry = { id: child.key, ...child.val() };
+  // 1단계: 이 전환을 누가 담당할지 nowPlaying 트랜잭션으로 원자적으로 확정한다.
+  // (큐 조회보다 먼저 소유권부터 잠가야, 여러 명이 연속으로 스킵을 성사시켜도
+  //  같은 곡을 두 번 승격시키거나 아직 안 지워진 큐 항목을 다시 집어오는 일이 없다.)
+  const claim = await runTransaction(nowPlayingRef, (current) => {
+    if (!current || current.queueId !== expectedQueueId) return; // 이미 다른 클라이언트가 처리함
+    if (current.state === "advancing") return; // 이미 전환 진행 중
+    return { ...current, state: "advancing" };
   });
 
-  const result = await runTransaction(nowPlayingRef, (current) => {
-    const currentQueueId = current ? current.queueId : undefined;
-    if (currentQueueId !== expectedQueueId) return; // 이미 다른 클라이언트가 처리함
+  if (!claim.committed) return;
 
-    if (!nextEntry) {
-      return { state: "idle", queueId: null, videoId: null, title: null, startedAt: null, positionAtStart: 0 };
-    }
-    return {
-      queueId: nextEntry.id,
-      videoId: nextEntry.videoId,
-      title: nextEntry.title || nextEntry.videoId,
-      state: "playing",
-      startedAt: serverNow(),
-      positionAtStart: 0,
-    };
+  // 2단계: 소유권을 확보한 클라이언트만 큐에서 맨 앞 곡을 원자적으로 꺼낸다.
+  let poppedEntry = null;
+  await runTransaction(queueRef, (current) => {
+    poppedEntry = null;
+    if (!current) return current;
+    const firstKey = Object.keys(current).sort()[0];
+    if (firstKey === undefined) return current;
+    poppedEntry = { id: firstKey, ...current[firstKey] };
+    const next = { ...current };
+    delete next[firstKey];
+    return next;
   });
 
-  if (result.committed) {
-    await remove(ref(db, `skipVotes/${expectedQueueId}`));
-    if (nextEntry) {
-      await remove(ref(db, `queue/${nextEntry.id}`));
-    }
-  }
+  // 3단계: 실제 재생 상태로 확정 (소유권은 이미 확보했으므로 단순 update로 충분)
+  await update(
+    nowPlayingRef,
+    poppedEntry
+      ? {
+          queueId: poppedEntry.id,
+          videoId: poppedEntry.videoId,
+          title: poppedEntry.title || poppedEntry.videoId,
+          state: "playing",
+          startedAt: serverNow(),
+          positionAtStart: 0,
+        }
+      : { state: "idle", queueId: null, videoId: null, title: null, startedAt: null, positionAtStart: 0 }
+  );
+
+  await remove(ref(db, `skipVotes/${expectedQueueId}`));
 }
 
 // --- 곡 추가 ---
@@ -289,6 +308,12 @@ function renderNowPlaying(np) {
     titleEl.textContent = "재생 중인 곡 없음";
     playPauseBtn.disabled = true;
     playPauseBtn.textContent = "재생";
+    return;
+  }
+
+  if (np.state === "advancing") {
+    titleEl.textContent = "다음 곡으로 이동 중…";
+    playPauseBtn.disabled = true;
     return;
   }
 
