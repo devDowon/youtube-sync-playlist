@@ -1,4 +1,4 @@
-import { db } from "./firebase-init.js";
+import { db, authReady } from "./firebase-init.js";
 import {
   ref,
   onValue,
@@ -104,6 +104,7 @@ async function reportLocalPlaybackChange(isPlaying) {
     !player
   )
     return;
+  await authReady;
   const pos = Math.max(0, player.getCurrentTime());
   await update(nowPlayingRef, {
     state: isPlaying ? "playing" : "paused",
@@ -189,6 +190,7 @@ async function togglePlayPause() {
   const np = latestNowPlaying;
   if (!np || np.state === "idle" || np.state === "advancing") return;
 
+  await authReady;
   if (np.state === "playing") {
     const pos = Math.max(0, targetPosition(np));
     await update(nowPlayingRef, { state: "paused", positionAtStart: pos });
@@ -198,6 +200,7 @@ async function togglePlayPause() {
 }
 
 export async function advanceToNext(expectedQueueId) {
+  await authReady;
   // 1단계: 이 전환을 누가 담당할지 nowPlaying 트랜잭션으로 원자적으로 확정한다.
   // (큐 조회보다 먼저 소유권부터 잠가야, 여러 명이 연속으로 스킵을 성사시켜도
   //  같은 곡을 두 번 승격시키거나 아직 안 지워진 큐 항목을 다시 집어오는 일이 없다.)
@@ -280,6 +283,7 @@ async function addSongFromInput() {
   }
   input.value = "";
 
+  await authReady;
   const title = await fetchTitle(videoId);
 
   // 큐에 먼저 넣었다가 idle이면 승격 후 지우는 방식은, 승격과 삭제 사이의 짧은 창에

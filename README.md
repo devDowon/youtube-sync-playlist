@@ -12,7 +12,7 @@
    - 보안 규칙은 "테스트 모드"로 시작해도 되고, 바로 아래 3단계 규칙으로 덮어써도 됩니다
 3. 생성된 데이터베이스의 **규칙(Rules)** 탭을 열고, 이 저장소의 `database.rules.json` 내용을 그대로 붙여넣은 뒤 "게시(Publish)"
 4. 왼쪽 메뉴 **빌드 → Authentication** → "시작하기" → **Sign-in method** 탭에서 "익명(Anonymous)" 제공업체를 활성화
-   - `presence`/`skipVotes` 쓰기 규칙이 `auth.uid`를 기준으로 본인 항목인지 검증하기 때문에, 이 설정 없이는 접속자 표시와 스킵 투표가 모두 permission-denied로 실패합니다.
+   - `queue`/`nowPlaying`/`chat`/`presence`/`skipVotes` 쓰기 규칙이 모두 로그인(`auth != null`)을 요구하기 때문에, 이 설정 없이는 곡 추가/재생 제어/채팅/접속자 표시/스킵 투표가 전부 permission-denied로 실패합니다. (`presence`/`skipVotes`는 추가로 `auth.uid`가 본인 항목인지까지 검증합니다.)
 
 ## 2. 웹 앱 등록 & config 값 받기
 
@@ -64,6 +64,7 @@ python -m http.server 8000
 ```
 
 - 채팅은 별도 로그인/식별 없이 모두 "익명"으로 표시됩니다. 발신자를 구분하지 않습니다.
+- Realtime Database엔 자체 TTL(자동 만료) 기능이 없어서, 클라이언트가 메시지를 보낼 때마다 `sentAt` 기준 1시간이 지난 채팅을 함께 지웁니다(`chat.js`의 `pruneOldMessages`). 아무도 채팅을 보내지 않으면 정리도 미뤄지지만, 화면엔 어차피 최근 10개만 보이므로 사용에는 영향이 없습니다.
 - `clientId`는 페이지 로드 시 자동으로 이루어지는 Firebase 익명 인증(`signInAnonymously`)의 `auth.uid`를 그대로 사용합니다. `presence`/`skipVotes`는 각 항목이 "본인 uid로만 쓰기 가능"하도록 규칙으로 검증되어, 다른 사람 행세로 접속자 수나 스킵 투표를 조작할 수 없습니다. 다만 완료된 투표를 정리(삭제)하는 것은 어느 클라이언트나 할 수 있도록 예외를 뒀습니다.
 - `presence`는 각 브라우저 탭이 페이지에 접속해 있는 동안만 존재하는 항목입니다. `onDisconnect()`로 등록해두기 때문에 탭을 닫거나 연결이 끊기면 Firebase가 자동으로 지웁니다. 같은 사람이 탭을 여러 개 열면 그만큼 접속자 수에 중복으로 잡힙니다.
 - "다음 곡" 버튼은 즉시 스킵하지 않고 **투표**로 동작합니다. 현재 접속자 수의 과반(`floor(접속자수/2) + 1`)이 투표하면 자동으로 다음 곡으로 넘어가고, 그 순간 해당 곡의 `skipVotes` 기록은 삭제됩니다. 여러 클라이언트가 동시에 과반 조건을 감지해도 `nowPlaying`에 대한 Firebase transaction으로 중복 스킵을 막습니다. 투표 도중 탭을 닫으면 `onDisconnect()`로 해당 표도 함께 정리됩니다.

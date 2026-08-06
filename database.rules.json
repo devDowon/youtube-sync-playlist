@@ -2,18 +2,19 @@
   "rules": {
     "queue": {
       ".read": true,
-      ".write": true,
+      ".write": "auth != null",
       "$songId": {
         ".validate": "newData.hasChildren(['videoId', 'title', 'addedAt']) && newData.child('videoId').isString() && newData.child('videoId').val().length == 11"
       }
     },
     "nowPlaying": {
       ".read": true,
-      ".write": true
+      ".write": "auth != null"
     },
     "chat": {
       ".read": true,
-      ".write": true,
+      ".write": "auth != null",
+      ".indexOn": ["sentAt"],
       "$messageId": {
         ".validate": "newData.hasChildren(['text', 'sentAt']) && newData.child('text').isString() && newData.child('text').val().length > 0 && newData.child('text').val().length <= 300 && newData.child('sentAt').isNumber()"
       }
