@@ -38,6 +38,18 @@ let latestNowPlaying = null;
 
 const DRIFT_TOLERANCE_SEC = 1.5;
 
+// syncPlayback()이 스스로 player를 조작할 때 그로 인해 발생하는 onStateChange를
+// "로컬 사용자가 직접 조작함"으로 오인하지 않도록 잠깐 표시해두는 플래그
+let syncing = false;
+let syncingTimer = null;
+function markSyncing() {
+  syncing = true;
+  clearTimeout(syncingTimer);
+  syncingTimer = setTimeout(() => {
+    syncing = false;
+  }, 1500);
+}
+
 // --- YouTube IFrame API ---
 function loadYouTubeAPI() {
   return new Promise((resolve) => {
@@ -74,7 +86,28 @@ async function createPlayer(initialVideoId) {
 function onPlayerStateChange(event) {
   if (event.data === YT.PlayerState.ENDED && latestNowPlaying && latestNowPlaying.queueId) {
     advanceToNext(latestNowPlaying.queueId);
+    return;
   }
+
+  // syncPlayback()이 스스로 seekTo/playVideo/pauseVideo를 호출해서 생긴 이벤트는 무시.
+  // 그 외의 PLAYING/PAUSED 전환은 사용자가 유튜브 플레이어를 직접 조작한 것
+  // (탐색 바로 구간 이동, 네이티브 재생/일시정지 버튼 등)이므로 공유 상태로 반영한다.
+  if (syncing) return;
+  if (event.data === YT.PlayerState.PLAYING) {
+    reportLocalPlaybackChange(true);
+  } else if (event.data === YT.PlayerState.PAUSED) {
+    reportLocalPlaybackChange(false);
+  }
+}
+
+async function reportLocalPlaybackChange(isPlaying) {
+  if (!latestNowPlaying || latestNowPlaying.state === "idle" || !player) return;
+  const pos = Math.max(0, player.getCurrentTime());
+  await update(nowPlayingRef, {
+    state: isPlaying ? "playing" : "paused",
+    positionAtStart: pos,
+    startedAt: serverNow(),
+  });
 }
 
 function getCurrentVideoId() {
@@ -103,24 +136,45 @@ function syncPlayback(np) {
   const target = Math.max(0, targetPosition(np));
 
   if (getCurrentVideoId() !== np.videoId) {
+    markSyncing();
     player.loadVideoById({ videoId: np.videoId, startSeconds: target });
     if (np.state === "paused") {
-      setTimeout(() => player.pauseVideo(), 300);
+      setTimeout(() => {
+        markSyncing();
+        player.pauseVideo();
+      }, 300);
     }
     return;
   }
 
   const drift = Math.abs(player.getCurrentTime() - target);
   if (drift > DRIFT_TOLERANCE_SEC) {
+    markSyncing();
     player.seekTo(target, true);
   }
 
   const state = player.getPlayerState();
   if (np.state === "playing" && state !== YT.PlayerState.PLAYING) {
+    markSyncing();
     player.playVideo();
   }
   if (np.state === "paused" && state !== YT.PlayerState.PAUSED) {
+    markSyncing();
     player.pauseVideo();
+  }
+}
+
+// 일시정지 상태에서의 탐색 바 이동은 onStateChange를 발생시키지 않으므로,
+// 주기 점검에서 별도로 감지한다 (일시정지 중엔 재생 위치가 저절로 움직이지 않으므로
+// positionAtStart와 달라졌다면 로컬 사용자가 직접 옮긴 것으로 판단해도 안전하다).
+function checkPausedSeek(np) {
+  if (!player || !playerReady || syncing) return;
+  if (!np || np.state !== "paused") return;
+  if (player.getPlayerState() !== YT.PlayerState.PAUSED) return;
+
+  const drift = Math.abs(player.getCurrentTime() - (np.positionAtStart || 0));
+  if (drift > DRIFT_TOLERANCE_SEC) {
+    reportLocalPlaybackChange(false);
   }
 }
 
@@ -279,7 +333,9 @@ document.getElementById("join-btn").addEventListener("click", async () => {
   joined = true;
   syncPlayback(latestNowPlaying);
   setInterval(() => {
-    if (joined) syncPlayback(latestNowPlaying);
+    if (!joined) return;
+    checkPausedSeek(latestNowPlaying);
+    syncPlayback(latestNowPlaying);
   }, 3000);
 });
 
