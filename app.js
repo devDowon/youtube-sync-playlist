@@ -92,7 +92,13 @@ async function createPlayer(initialVideoId) {
     player = new YT.Player("player", {
       height: "360",
       width: "640",
-      videoId: initialVideoId || undefined,
+      // videoId를 명시적으로 undefined로 넘기면(예전엔 `initialVideoId || undefined`)
+      // 유튜브 위젯 API 내부가 "Invalid video id"로 즉시 예외를 던지면서 플레이어
+      // 내부 상태가 깨져, 이후 loadVideoById()를 불러도 영상이 뜨지 않는 문제가 있었다
+      // (아직 재생 중인 곡이 없는 방에 첫 사용자가 들어와 첫 곡을 추가했을 때 재현됨,
+      // 새로고침하면 initialVideoId가 채워진 채로 플레이어가 다시 만들어져 우연히 해결됨).
+      // 그래서 초기 영상이 없을 땐 videoId 키 자체를 아예 넣지 않는다.
+      ...(initialVideoId ? { videoId: initialVideoId } : {}),
       // 쿠키를 심지 않는 youtube-nocookie.com 도메인으로 임베드한다.
       host: "https://www.youtube-nocookie.com",
       // 탐색바/일시정지 등 네이티브 컨트롤을 통째로 숨겨서 각자 임의로 재생을
