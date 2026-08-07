@@ -90,7 +90,18 @@ function onPlayerStateChange(event) {
   // syncPlayback()이 스스로 seekTo/playVideo/pauseVideo/loadVideoById를 호출해서 생긴 이벤트는 무시.
   // 드리프트 보정으로 영상 끝 근처까지 seekTo했을 때 플레이어가 곧장 ENDED를 쏘는 경우가 있는데,
   // 이걸 자연 종료로 오인해 곡을 강제로 넘기면 안 되므로 ENDED 판정보다 먼저 걸러낸다.
-  if (syncing) return;
+  //
+  // 버퍼링이 고정 타임아웃(1.5초)보다 오래 걸리면, 그 뒤늦게 뜬 진짜 PLAYING이 로컬
+  // 사용자 조작으로 오인되어 positionAtStart를 0 근처로 재전파 → 이미 앞서가던 다른
+  // 클라이언트들이 전부 되감기는 에코 루프가 생긴 적이 있다. 그래서 버퍼링 중에는
+  // BUFFERING 이벤트가 들어올 때마다 타이머를 계속 늘려서, 실제로 재생/정지가 확정된
+  // 뒤에야 syncing이 풀리게 한다.
+  if (syncing) {
+    if (event.data === YT.PlayerState.BUFFERING) {
+      markSyncing();
+    }
+    return;
+  }
 
   if (event.data === YT.PlayerState.ENDED && latestNowPlaying && latestNowPlaying.queueId) {
     advanceToNext(latestNowPlaying.queueId);
