@@ -74,10 +74,23 @@ async function createPlayer(initialVideoId) {
       height: "360",
       width: "640",
       videoId: initialVideoId || undefined,
-      playerVars: { playsinline: 1 },
+      // 쿠키를 심지 않는 youtube-nocookie.com 도메인으로 임베드한다.
+      host: "https://www.youtube-nocookie.com",
+      // 탐색바/일시정지 등 네이티브 컨트롤을 통째로 숨겨서 각자 임의로 재생을
+      // 조작(시간 이동, 정지)하지 못하게 한다. 키보드 단축키(스페이스바 정지 등)도
+      // 같은 이유로 막는다. 소리 켜기는 별도의 커스텀 버튼(unmute-btn)으로 처리한다.
+      playerVars: { playsinline: 1, controls: 0, disablekb: 1 },
       events: {
         onReady: () => {
           playerReady = true;
+          // 입장 시점에 이미 재생 중인 곡이 있으면 "참여하기" 클릭 흐름 안에서
+          // 바로 재생이 걸리므로 자동재생이 막히지 않는다. 반대로 아직 재생 중인
+          // 곡이 없어 영상 없이 플레이어를 만든 경우엔, 나중에 누군가 곡을 추가할 때
+          // Firebase 리스너(비동기 콜백, 사용자 제스처 밖)가 재생을 트리거하게 되어
+          // 브라우저가 자동재생을 막아버리므로, 그 경우에만 음소거로 시작한다.
+          if (!initialVideoId) {
+            player.mute();
+          }
           resolve(player);
         },
         onStateChange: onPlayerStateChange,
@@ -240,20 +253,6 @@ function checkStuckAdvance(np) {
   if (!np || np.state !== "advancing" || !np.queueId) return;
   if (serverNow() - (np.advancingSince || 0) > ADVANCING_STUCK_MS) {
     advanceToNext(np.queueId);
-  }
-}
-
-// --- 컨트롤 ---
-async function togglePlayPause() {
-  const np = latestNowPlaying;
-  if (!np || np.state === "idle" || np.state === "advancing") return;
-
-  await authReady;
-  if (np.state === "playing") {
-    const pos = Math.max(0, targetPosition(np));
-    await update(nowPlayingRef, { state: "paused", positionAtStart: pos });
-  } else {
-    await update(nowPlayingRef, { state: "playing", startedAt: serverNow() });
   }
 }
 
@@ -431,24 +430,18 @@ async function deleteFromQueue(songId) {
 // --- 렌더링 ---
 function renderNowPlaying(np) {
   const titleEl = document.getElementById("now-playing-title");
-  const playPauseBtn = document.getElementById("play-pause-btn");
 
   if (!np || np.state === "idle" || !np.videoId) {
     titleEl.textContent = "재생 중인 곡 없음";
-    playPauseBtn.disabled = true;
-    playPauseBtn.textContent = "재생";
     return;
   }
 
   if (np.state === "advancing") {
     titleEl.textContent = "다음 곡으로 이동 중…";
-    playPauseBtn.disabled = true;
     return;
   }
 
   titleEl.textContent = np.title || np.videoId;
-  playPauseBtn.disabled = false;
-  playPauseBtn.textContent = np.state === "playing" ? "일시정지" : "재생";
 }
 
 function renderQueue(queueVal) {
@@ -502,7 +495,14 @@ document.getElementById("join-btn").addEventListener("click", async () => {
   }, 3000);
 });
 
-document.getElementById("play-pause-btn").addEventListener("click", togglePlayPause);
+// 자동재생 허용을 위해 음소거로 시작하므로, 네이티브 플레이어 컨트롤과 무관하게
+// 우리 UI에서 직접 소리를 켤 수 있어야 한다 (나중에 탐색바를 막느라 네이티브
+// 컨트롤 자체를 숨기더라도 이 버튼은 그대로 동작한다).
+document.getElementById("unmute-btn").addEventListener("click", () => {
+  if (!player) return;
+  player.unMute();
+  player.setVolume(100);
+});
 
 document.getElementById("add-form").addEventListener("submit", (e) => {
   e.preventDefault();
