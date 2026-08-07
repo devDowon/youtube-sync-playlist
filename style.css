@@ -128,8 +128,19 @@ button:disabled {
 }
 
 #queue-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
   padding: 6px 0;
   border-bottom: 1px solid #262626;
+}
+
+.queue-delete-btn {
+  flex-shrink: 0;
+  padding: 4px 10px;
+  font-size: 0.8rem;
+  color: var(--muted);
 }
 
 #chat-list {

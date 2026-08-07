@@ -1,4 +1,5 @@
 import { db, authReady } from "./firebase-init.js";
+import { nicknameFromUid } from "./nickname.js";
 import {
   ref,
   push,
@@ -28,13 +29,13 @@ function renderMessages(val) {
   Object.keys(val)
     .sort()
     .forEach((key) => {
-      const { text } = val[key];
+      const { text, nickname } = val[key];
       if (!text) return;
 
       const li = document.createElement("li");
       const sender = document.createElement("span");
       sender.className = "chat-sender";
-      sender.textContent = "익명";
+      sender.textContent = nickname || "익명";
       const body = document.createElement("span");
       body.className = "chat-text";
       body.textContent = text;
@@ -66,7 +67,7 @@ chatForm.addEventListener("submit", async (e) => {
   const text = chatInput.value.trim().slice(0, MAX_LENGTH);
   if (!text) return;
   chatInput.value = "";
-  await authReady;
-  await set(push(chatRef), { text, sentAt: Date.now() });
+  const uid = await authReady;
+  await set(push(chatRef), { text, sentAt: Date.now(), nickname: nicknameFromUid(uid) });
   pruneOldMessages();
 });

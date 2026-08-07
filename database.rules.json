@@ -2,21 +2,29 @@
   "rules": {
     "queue": {
       ".read": true,
-      ".write": "auth != null",
       "$songId": {
-        ".validate": "newData.hasChildren(['videoId', 'title', 'addedAt']) && newData.child('videoId').isString() && newData.child('videoId').val().length == 11"
+        ".write": "auth != null && (!data.exists() || data.child('addedBy').val() === auth.uid || root.child('nowPlaying').child('queueId').val() === $songId)",
+        ".validate": "newData.hasChildren(['videoId', 'title', 'addedAt', 'addedBy']) && newData.child('videoId').isString() && newData.child('videoId').val().length == 11 && newData.child('addedBy').val() === auth.uid && root.child('lastAdd').child(auth.uid).exists() && now - root.child('lastAdd').child(auth.uid).val() < 10000"
       }
     },
     "nowPlaying": {
       ".read": true,
-      ".write": "auth != null"
+      ".write": "auth != null",
+      ".validate": "(data.exists() && data.child('state').val() !== 'idle') || newData.child('state').val() === 'idle' || (root.child('lastAdd').child(auth.uid).exists() && now - root.child('lastAdd').child(auth.uid).val() < 10000)"
+    },
+    "lastAdd": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && auth.uid === $uid",
+        ".validate": "newData.isNumber() && newData.val() === now && (!data.exists() || now - data.val() >= 60000)"
+      }
     },
     "chat": {
       ".read": true,
       ".write": "auth != null",
       ".indexOn": ["sentAt"],
       "$messageId": {
-        ".validate": "newData.hasChildren(['text', 'sentAt']) && newData.child('text').isString() && newData.child('text').val().length > 0 && newData.child('text').val().length <= 300 && newData.child('sentAt').isNumber()"
+        ".validate": "newData.hasChildren(['text', 'sentAt', 'nickname']) && newData.child('text').isString() && newData.child('text').val().length > 0 && newData.child('text').val().length <= 300 && newData.child('sentAt').isNumber() && newData.child('nickname').isString() && newData.child('nickname').val().length > 0 && newData.child('nickname').val().length <= 30"
       }
     },
     "presence": {
