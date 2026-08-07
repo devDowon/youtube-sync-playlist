@@ -1,63 +1,278 @@
+/* ==========================================================================
+   같이 듣기 — 조명을 낮춘 라운지 톤의 다크 UI
+   무채색 대신 아주 옅은 자줏빛을 섞은 중립 스케일 + 단일 로즈 액센트.
+   ========================================================================== */
+
 :root {
-  color-scheme: light dark;
-  --bg: #121212;
-  --panel: #1e1e1e;
-  --text: #f2f2f2;
-  --muted: #9a9a9a;
-  --accent: #ff5c8a;
+  color-scheme: dark;
+
+  /* --- 표면 스케일 (bg → surface-3 순으로 한 단계씩 밝아짐) --- */
+  --bg: #0f0d12;
+  --bg-sunk: #0a080d;      /* 입력창처럼 "파인" 면 */
+  --surface: #16131b;      /* 카드 */
+  --surface-2: #1d1926;    /* 카드 위 요소 */
+  --surface-3: #262031;    /* hover */
+  --line-soft: #201c29;    /* 같은 카드 안의 구분선 */
+  --line: #2a2434;         /* 카드 경계 */
+  --line-strong: #3a3247;  /* 인터랙티브 요소 경계 */
+
+  /* --- 텍스트 (모두 배경 대비 4.6:1 이상) --- */
+  --text: #f0ecf2;
+  --text-2: #b7aec0;
+  --text-3: #8d8498;
+
+  /* --- 액센트: 로즈 한 갈래만 사용 --- */
+  --accent: #ff5d7d;
+  --accent-hi: #ff8098;
+  --accent-lo: #e6456a;
+  --accent-ink: #1c0b11;
+  --accent-tint: rgba(255, 93, 125, 0.12);
+  --accent-tint-2: rgba(255, 93, 125, 0.19);
+  --accent-edge: rgba(255, 93, 125, 0.26);
+
+  --live: #5cd6a8;
+  --danger: #ff7061;
+
+  /* --- 간격: 4px 배수 --- */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 20px;
+  --sp-6: 24px;
+  --sp-8: 32px;
+  --sp-10: 40px;
+  --sp-12: 48px;
+
+  /* --- 라운드 --- */
+  --r-xs: 6px;
+  --r-sm: 9px;
+  --r-md: 12px;
+  --r-lg: 16px;
+  --r-xl: 20px;
+  --r-pill: 999px;
+
+  /* --- 그림자: 큰 blur 하나 대신 얇은 층 + 넓은 층 --- */
+  --sh-1: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --sh-2: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 20px -10px rgba(0, 0, 0, 0.7);
+  --sh-3: 0 2px 4px rgba(0, 0, 0, 0.4), 0 24px 56px -20px rgba(0, 0, 0, 0.85);
+
+  /* --- 타이포 --- */
+  --font: -apple-system, BlinkMacSystemFont, "Pretendard Variable", Pretendard,
+    "Segoe UI", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  --fs-2xs: 0.6875rem; /* 11 */
+  --fs-xs: 0.75rem;    /* 12 */
+  --fs-sm: 0.8125rem;  /* 13 */
+  --fs-md: 0.875rem;   /* 14 */
+  --fs-base: 0.9375rem;/* 15 */
+  --fs-lg: 1.0625rem;  /* 17 */
+  --fs-xl: 1.3125rem;  /* 21 */
+  --fs-2xl: 1.75rem;   /* 28 */
+
+  /* --- 모션: 진입은 감속, 미세 반응은 짧게 --- */
+  --ease: cubic-bezier(0.4, 0.14, 0.3, 1);
+  --ease-out: cubic-bezier(0.16, 0.84, 0.44, 1);
+  --dur-1: 140ms;
+  --dur-2: 200ms;
+  --dur-3: 320ms;
+
+  /* --- 아이콘 (인라인 SVG 마스크, 24 viewBox / stroke 2 / round cap 통일) --- */
+  --i-skip: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 4l10 8-10 8z'/%3E%3Cpath d='M19 5v14'/%3E%3C/svg%3E");
+  --i-volume: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M11 5L6 9H2v6h4l5 4z'/%3E%3Cpath d='M15.5 8.5a5 5 0 010 7'/%3E%3Cpath d='M19 5a10 10 0 010 14'/%3E%3C/svg%3E");
+  --i-plus: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 5v14M5 12h14'/%3E%3C/svg%3E");
+  --i-send: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 19V6M5 13l7-7 7 7'/%3E%3C/svg%3E");
 }
 
-* {
+/* ==========================================================================
+   Base
+   ========================================================================== */
+
+*,
+*::before,
+*::after {
   box-sizing: border-box;
+}
+
+/* join-btn은 JS가 hidden 속성으로 토글한다. .btn의 display가 이걸 덮어쓰지 않도록. */
+[hidden] {
+  display: none !important;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
   margin: 0;
-  font-family: -apple-system, "Segoe UI", Pretendard, sans-serif;
-  background: var(--bg);
+  min-height: 100vh;
+  font-family: var(--font);
+  font-size: var(--fs-base);
+  line-height: 1.6;
   color: var(--text);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* 화면 상단의 아주 옅은 무대 조명. 배경이 완전한 평면으로 보이지 않을 만큼만. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(105% 60% at 50% -10%, rgba(255, 93, 125, 0.09), transparent 62%),
+    radial-gradient(80% 50% at 88% 4%, rgba(255, 168, 120, 0.045), transparent 60%);
+}
+
+h1,
+h2 {
+  margin: 0;
+  font-weight: 600;
+}
+
+::selection {
+  background: rgba(255, 93, 125, 0.3);
+  color: #fff;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent-hi);
+  outline-offset: 2px;
 }
 
 main {
-  max-width: 960px;
+  position: relative;
+  z-index: 1;
+  max-width: 1080px;
   margin: 0 auto;
-  padding: 24px 16px 64px;
+  padding: var(--sp-8) var(--sp-5) var(--sp-12);
 }
 
-#viewer-count {
-  font-size: 0.85rem;
-  color: var(--muted);
-  margin-bottom: 16px;
-}
+/* ==========================================================================
+   Header
+   ========================================================================== */
 
-#layout {
-  display: grid;
-  grid-template-columns: 1fr 300px;
-  gap: 24px;
-  align-items: start;
-}
-
-#chat-col {
+.app-header {
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-4);
+  margin-bottom: var(--sp-6);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 11px;
   min-width: 0;
 }
 
-@media (max-width: 800px) {
-  #layout {
-    grid-template-columns: 1fr;
-  }
+.brand h1 {
+  font-size: var(--fs-xl);
+  line-height: 1.2;
+  letter-spacing: -0.025em;
 }
 
-h1 {
-  font-size: 1.4rem;
-  margin: 0 0 16px;
+/* 이퀄라이저 형태의 브랜드 마크 (이모지 대체) */
+.mark {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 19px;
+  flex-shrink: 0;
 }
 
-h2 {
-  font-size: 1.1rem;
-  margin: 32px 0 8px;
-  color: var(--muted);
+.mark i {
+  display: block;
+  width: 3px;
+  border-radius: var(--r-pill);
+  background: var(--accent);
+}
+
+.mark i:nth-child(1) {
+  height: 9px;
+  opacity: 0.55;
+}
+
+.mark i:nth-child(2) {
+  height: 19px;
+}
+
+.mark i:nth-child(3) {
+  height: 13px;
+  opacity: 0.78;
+}
+
+.mark-lg {
+  height: 28px;
+  gap: 4px;
+  justify-content: center;
+}
+
+.mark-lg i {
+  width: 4px;
+}
+
+.mark-lg i:nth-child(1) { height: 13px; }
+.mark-lg i:nth-child(2) { height: 28px; }
+.mark-lg i:nth-child(3) { height: 19px; }
+
+#viewer-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  flex-shrink: 0;
+  padding: 5px 12px 5px 10px;
+  font-size: var(--fs-sm);
+  color: var(--text-2);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+}
+
+/* JS가 textContent를 통째로 바꾸므로 표시등은 가상 요소로 둔다 */
+#viewer-count::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--live);
+  box-shadow: 0 0 0 3px rgba(92, 214, 168, 0.15);
+}
+
+/* ==========================================================================
+   Layout
+   ========================================================================== */
+
+#layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: var(--sp-6);
+  align-items: start;
+}
+
+#main-col {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+  min-width: 0;
+}
+
+/* ==========================================================================
+   Stage (플레이어 + 현재 곡 + 컨트롤을 하나의 표면으로 묶는다)
+   ========================================================================== */
+
+.stage {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  box-shadow: var(--sh-2);
+  overflow: hidden;
 }
 
 #player-wrap {
@@ -65,13 +280,14 @@ h2 {
   width: 100%;
   aspect-ratio: 16 / 9;
   background: #000;
-  border-radius: 8px;
-  overflow: hidden;
+  border-bottom: 1px solid var(--line-soft);
 }
 
 #player {
+  display: block;
   width: 100%;
   height: 100%;
+  border: 0;
 }
 
 /* 유튜브 iframe은 컨트롤을 숨겨도 영상 자체를 클릭하면 재생/정지가 토글되는데,
@@ -80,178 +296,612 @@ h2 {
 #player-shield {
   position: absolute;
   inset: 0;
+  z-index: 1;
+}
+
+/* 영상 가장자리를 정리하는 헤어라인. 클릭은 그대로 shield로 통과시킨다. */
+#player-wrap::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+.stage-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  padding: var(--sp-3) var(--sp-4);
 }
 
 #now-playing-info {
-  margin: 12px 0;
-  font-size: 0.95rem;
-  color: var(--muted);
+  display: grid;
+  gap: 1px;
+  flex: 1;
+  min-width: 0;
+}
+
+.np-label {
+  font-size: var(--fs-2xs);
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  color: var(--text-3);
+}
+
+#now-playing-title {
+  min-width: 0;
+  font-size: var(--fs-lg);
+  font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: -0.012em;
+  color: var(--text);
+  /* 곡이 바뀌어도 바 높이가 흔들리지 않도록 한 줄 유지 */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 #controls {
   display: flex;
-  gap: 8px;
-  margin-bottom: 24px;
+  gap: var(--sp-2);
+  flex-shrink: 0;
 }
 
-button {
-  cursor: pointer;
-  border: none;
-  border-radius: 6px;
-  padding: 10px 16px;
-  font-size: 0.95rem;
-  background: var(--panel);
+/* ==========================================================================
+   Buttons
+   ========================================================================== */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 38px;
+  padding: 8px 14px;
+  font-family: inherit;
+  font-size: var(--fs-md);
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.005em;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
   color: var(--text);
+  background: var(--surface-2);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  transition:
+    background-color var(--dur-1) var(--ease),
+    border-color var(--dur-1) var(--ease),
+    color var(--dur-1) var(--ease),
+    transform var(--dur-1) var(--ease);
 }
 
-button:hover:not(:disabled) {
-  background: #2a2a2a;
+.btn:hover:not(:disabled) {
+  background: var(--surface-3);
+  border-color: #453b53;
 }
 
-button:disabled {
-  opacity: 0.4;
+.btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.btn:disabled {
   cursor: default;
+  color: var(--text-3);
+  background: var(--surface);
+  border-color: var(--line);
+}
+
+.btn-primary {
+  color: var(--accent-ink);
+  background: var(--accent);
+  border-color: transparent;
+  box-shadow: var(--sh-1);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--accent-hi);
+  border-color: transparent;
+}
+
+.btn-primary:active:not(:disabled) {
+  background: var(--accent-lo);
+}
+
+/* 처음 들어오면 반드시 눌러야 소리가 나는 버튼이라 액센트를 옅게 얹어 유도한다 */
+.btn-soft {
+  color: var(--accent-hi);
+  background: var(--accent-tint);
+  border-color: var(--accent-edge);
+}
+
+.btn-soft:hover:not(:disabled) {
+  color: #ff96aa;
+  background: var(--accent-tint-2);
+  border-color: rgba(255, 93, 125, 0.4);
+}
+
+.btn-icon::before {
+  content: "";
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  background: currentColor;
+  -webkit-mask: var(--icon) center / contain no-repeat;
+  mask: var(--icon) center / contain no-repeat;
+}
+
+#skip-btn { --icon: var(--i-skip); }
+#unmute-btn { --icon: var(--i-volume); }
+.btn-add { --icon: var(--i-plus); }
+.btn-send { --icon: var(--i-send); }
+
+.btn-block {
+  display: flex;
+  width: 100%;
+  min-height: 46px;
+  font-size: var(--fs-base);
+}
+
+.btn-send {
+  width: 40px;
+  min-height: 40px;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+/* ==========================================================================
+   Panels / 폼
+   ========================================================================== */
+
+.panel {
+  padding: var(--sp-5);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  box-shadow: var(--sh-1);
+}
+
+.panel-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sp-3);
+}
+
+.panel > .panel-head {
+  margin: var(--sp-6) 0 var(--sp-1);
+}
+
+.panel-head h2 {
+  font-size: var(--fs-md);
+  letter-spacing: -0.005em;
+}
+
+.panel-hint {
+  font-size: var(--fs-xs);
+  color: var(--text-3);
+  white-space: nowrap;
+}
+
+.field {
+  flex: 1;
+  min-width: 0;
+  min-height: 40px;
+  padding: 9px 13px;
+  font-family: inherit;
+  font-size: var(--fs-md);
+  line-height: 1.4;
+  color: var(--text);
+  background: var(--bg-sunk);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  caret-color: var(--accent);
+  transition:
+    background-color var(--dur-1) var(--ease),
+    border-color var(--dur-1) var(--ease),
+    box-shadow var(--dur-1) var(--ease);
+}
+
+.field::placeholder {
+  color: var(--text-3);
+}
+
+.field:hover {
+  border-color: var(--line-strong);
+}
+
+.field:focus {
+  outline: none;
+  background: #100d15;
+  border-color: rgba(255, 93, 125, 0.5);
+  box-shadow: 0 0 0 3px var(--accent-tint);
 }
 
 #add-form {
   display: flex;
-  gap: 8px;
+  gap: var(--sp-2);
 }
 
-#add-form input {
-  flex: 1;
-  padding: 10px 12px;
-  border-radius: 6px;
-  border: 1px solid #333;
-  background: var(--panel);
-  color: var(--text);
-  font-size: 0.95rem;
+.form-hint {
+  margin: var(--sp-2) 0 0;
+  font-size: var(--fs-xs);
+  line-height: 1.5;
+  color: var(--text-3);
 }
 
-#add-form button {
-  background: var(--accent);
-  color: #1a1a1a;
-  font-weight: 600;
-}
+/* ==========================================================================
+   대기열
+   ========================================================================== */
 
 #queue-list {
-  list-style: decimal;
-  padding-left: 20px;
-  margin: 8px 0;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  counter-reset: queue;
 }
 
 #queue-list li {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  padding: 6px 0;
-  border-bottom: 1px solid #262626;
+  gap: var(--sp-3);
+  padding: 9px 0;
+  border-top: 1px solid var(--line-soft);
+}
+
+#queue-list li:first-child {
+  border-top: 0;
+}
+
+#queue-list li::before {
+  counter-increment: queue;
+  content: counter(queue);
+  flex: 0 0 20px;
+  text-align: center;
+  font-size: var(--fs-xs);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-3);
+}
+
+/* 바로 다음에 재생될 곡만 살짝 앞으로 */
+#queue-list li:first-child::before {
+  color: var(--accent);
+}
+
+#queue-list li:first-child > span {
+  color: var(--text);
+}
+
+#queue-list li > span {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--fs-md);
+  color: var(--text-2);
 }
 
 .queue-delete-btn {
   flex-shrink: 0;
-  padding: 4px 10px;
-  font-size: 0.8rem;
-  color: var(--muted);
+  padding: 4px 9px;
+  font-family: inherit;
+  font-size: var(--fs-xs);
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--text-3);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--r-xs);
+  cursor: pointer;
+  transition:
+    opacity var(--dur-1) var(--ease),
+    color var(--dur-1) var(--ease),
+    background-color var(--dur-1) var(--ease),
+    border-color var(--dur-1) var(--ease),
+    transform var(--dur-1) var(--ease);
 }
 
-#chat-list {
-  list-style: none;
-  padding: 0;
-  margin: 8px 0;
-  height: 400px;
-  overflow-y: auto;
-  border: 1px solid #262626;
-  border-radius: 8px;
+.queue-delete-btn:hover {
+  color: var(--danger);
+  background: rgba(255, 112, 97, 0.1);
+  border-color: rgba(255, 112, 97, 0.24);
 }
 
-@media (max-width: 800px) {
-  #chat-list {
-    height: 260px;
+.queue-delete-btn:active {
+  transform: translateY(1px);
+}
+
+/* 마우스 환경에서만 숨겼다가 꺼낸다. 터치에서는 항상 보인다. */
+@media (hover: hover) and (pointer: fine) {
+  .queue-delete-btn {
+    opacity: 0;
+  }
+
+  #queue-list li:hover .queue-delete-btn,
+  .queue-delete-btn:focus-visible {
+    opacity: 1;
   }
 }
 
-#chat-list li {
-  display: flex;
-  gap: 8px;
-  padding: 8px 12px;
-  border-bottom: 1px solid #262626;
+/* 빈 상태: JS가 innerHTML을 비우면 :empty가 걸린다 */
+.empty {
+  display: none;
+  margin: 0;
+  padding: var(--sp-6) var(--sp-4);
+  text-align: center;
+  font-size: var(--fs-sm);
+  line-height: 1.75;
+  color: var(--text-3);
 }
 
-#chat-list li:last-child {
-  border-bottom: none;
+#queue-list:empty ~ .empty {
+  display: block;
+}
+
+/* ==========================================================================
+   채팅
+   ========================================================================== */
+
+#chat-col {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  box-shadow: var(--sh-1);
+  overflow: hidden;
+}
+
+#chat-col .panel-head {
+  padding: var(--sp-3) var(--sp-4);
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.chat-body {
+  position: relative;
+  height: clamp(280px, 44vh, 440px);
+}
+
+/* 스크롤 영역 위쪽 경계를 부드럽게 (내용이 잘린다는 신호) */
+.chat-body::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 20px;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(var(--surface), rgba(22, 19, 27, 0));
+}
+
+#chat-list {
+  height: 100%;
+  margin: 0;
+  padding: var(--sp-2) 0;
+  list-style: none;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) transparent;
+}
+
+#chat-list::-webkit-scrollbar {
+  width: 10px;
+}
+
+#chat-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+#chat-list::-webkit-scrollbar-thumb {
+  background: var(--line-strong);
+  border: 3px solid transparent;
+  background-clip: padding-box;
+  border-radius: var(--r-pill);
+}
+
+#chat-list::-webkit-scrollbar-thumb:hover {
+  background: #4a4059;
+  background-clip: padding-box;
+}
+
+/* 구분선 없이 이름표 + 여백만으로 메시지를 나눈다 */
+#chat-list li {
+  display: grid;
+  gap: 1px;
+  padding: 7px var(--sp-4);
 }
 
 .chat-sender {
-  color: var(--muted);
-  font-size: 0.85rem;
-  flex-shrink: 0;
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  letter-spacing: 0.005em;
+  color: var(--text-3);
 }
 
 .chat-text {
+  font-size: var(--fs-md);
+  line-height: 1.55;
+  color: var(--text);
   word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+.chat-empty {
+  position: absolute;
+  inset: 0;
+  place-content: center;
+  padding: 0 var(--sp-6);
+}
+
+#chat-list:empty ~ .chat-empty {
+  display: grid;
 }
 
 #chat-form {
   display: flex;
-  gap: 8px;
-  margin-top: 8px;
+  gap: var(--sp-2);
+  padding: var(--sp-3) var(--sp-4);
+  border-top: 1px solid var(--line-soft);
 }
 
-#chat-form input {
-  flex: 1;
-  padding: 10px 12px;
-  border-radius: 6px;
-  border: 1px solid #333;
-  background: var(--panel);
-  color: var(--text);
-  font-size: 0.95rem;
-}
+/* ==========================================================================
+   참여 오버레이
+   ========================================================================== */
 
 #join-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.85);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 10;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: var(--sp-6);
+  background:
+    radial-gradient(70% 55% at 50% 42%, rgba(38, 22, 32, 0.62), rgba(6, 5, 9, 0.9));
+  -webkit-backdrop-filter: blur(10px) saturate(1.1);
+  backdrop-filter: blur(10px) saturate(1.1);
 }
 
 #join-card {
-  background: var(--panel);
-  padding: 32px;
-  border-radius: 12px;
+  width: min(360px, 100%);
+  padding: var(--sp-8) var(--sp-8) var(--sp-6);
   text-align: center;
-  max-width: 320px;
+  /* 위에서 빛이 오는 방향과 맞춘 아주 옅은 표면 그라데이션 */
+  background: linear-gradient(180deg, var(--surface-2), var(--surface) 62%);
+  border: 1px solid var(--line);
+  border-radius: var(--r-xl);
+  box-shadow: var(--sh-3);
+  animation: join-in var(--dur-3) var(--ease-out) both;
+}
+
+#join-card .mark {
+  margin: 0 auto;
+}
+
+.join-title {
+  margin: var(--sp-4) 0 var(--sp-2);
+  font-size: var(--fs-2xl);
+  line-height: 1.15;
+  letter-spacing: -0.035em;
 }
 
 #join-card p {
-  color: var(--muted);
-  font-size: 0.9rem;
-}
-
-#join-card button {
-  background: var(--accent);
-  color: #1a1a1a;
-  font-weight: 700;
-  padding: 12px 24px;
-  margin-top: 8px;
+  margin: 0;
+  font-size: var(--fs-sm);
+  line-height: 1.65;
+  color: var(--text-2);
 }
 
 #join-spinner {
-  width: 32px;
-  height: 32px;
-  margin: 16px auto 0;
-  border: 3px solid #333;
+  width: 26px;
+  height: 26px;
+  margin: var(--sp-6) auto var(--sp-1);
+  border: 2px solid var(--line-strong);
   border-top-color: var(--accent);
   border-radius: 50%;
   animation: join-spin 0.8s linear infinite;
 }
 
+#join-btn {
+  margin-top: var(--sp-6);
+  /* 로딩이 끝나 버튼이 나타나는 순간을 설명하는 등장 모션 */
+  animation: rise-in var(--dur-2) var(--ease-out) both;
+}
+
 @keyframes join-spin {
   to {
     transform: rotate(360deg);
+  }
+}
+
+@keyframes join-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.985);
+  }
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+/* ==========================================================================
+   반응형
+   ========================================================================== */
+
+@media (max-width: 800px) {
+  main {
+    padding: var(--sp-6) var(--sp-4) var(--sp-10);
+  }
+
+  #layout {
+    grid-template-columns: 1fr;
+    gap: var(--sp-5);
+  }
+
+  .chat-body {
+    height: clamp(240px, 36vh, 360px);
+  }
+}
+
+@media (max-width: 560px) {
+  main {
+    padding: var(--sp-5) var(--sp-4) var(--sp-8);
+  }
+
+  .app-header {
+    margin-bottom: var(--sp-5);
+  }
+
+  .brand h1 {
+    font-size: 1.1875rem;
+  }
+
+  /* 제목이 한 줄을 다 쓰도록 여기서만 세로로 나눈다 */
+  .stage-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--sp-3);
+  }
+
+  #controls > .btn {
+    flex: 1;
+  }
+
+  .panel {
+    padding: var(--sp-4);
+  }
+
+  .panel-hint {
+    display: none;
+  }
+}
+
+/* ==========================================================================
+   모션 최소화
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  /* 스피너는 "로딩 중"이라는 정보 자체라서 속도만 늦춘다 */
+  #join-spinner {
+    animation-duration: 1.6s !important;
+    animation-iteration-count: infinite !important;
   }
 }
