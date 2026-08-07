@@ -175,6 +175,15 @@ function syncPlayback(np) {
     return;
   }
 
+  // target이 이 영상의 실제 길이보다 크면(오래 열어둔 탭의 낡은 startedAt 등으로
+  // positionAtStart+경과시간 계산이 어긋난 경우) 그 지점으로 계속 seekTo를 반복하며
+  // 되감기 루프에 빠지는 대신, 이 곡은 이미 끝난 것으로 보고 다음 곡으로 넘긴다.
+  const duration = player.getDuration();
+  if (duration && target >= duration) {
+    if (np.queueId) advanceToNext(np.queueId);
+    return;
+  }
+
   const drift = Math.abs(player.getCurrentTime() - target);
   if (drift > DRIFT_TOLERANCE_SEC) {
     markSyncing();
