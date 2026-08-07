@@ -79,7 +79,9 @@ async function createPlayer(initialVideoId) {
       // 탐색바/일시정지 등 네이티브 컨트롤을 통째로 숨겨서 각자 임의로 재생을
       // 조작(시간 이동, 정지)하지 못하게 한다. 키보드 단축키(스페이스바 정지 등)도
       // 같은 이유로 막는다. 소리 켜기는 별도의 커스텀 버튼(unmute-btn)으로 처리한다.
-      playerVars: { playsinline: 1, controls: 0, disablekb: 1 },
+      // 컨트롤을 숨기면 CC(자막) 버튼도 같이 사라져 시청자가 직접 끌 수 없으므로,
+      // 각자의 유튜브 계정에 저장된 자막 선호와 무관하게 기본값을 항상 꺼둔다.
+      playerVars: { playsinline: 1, controls: 0, disablekb: 1, cc_load_policy: 0 },
       events: {
         onReady: () => {
           playerReady = true;
