@@ -60,10 +60,29 @@ function loadYouTubeAPI() {
       resolve();
       return;
     }
-    const tag = document.createElement("script");
-    tag.src = "https://www.youtube.com/iframe_api";
-    document.head.appendChild(tag);
-    window.onYouTubeIframeAPIReady = resolve;
+
+    let resolved = false;
+    window.onYouTubeIframeAPIReady = () => {
+      resolved = true;
+      resolve();
+    };
+
+    function appendScriptTag() {
+      const tag = document.createElement("script");
+      tag.src = "https://www.youtube.com/iframe_api";
+      document.head.appendChild(tag);
+    }
+
+    appendScriptTag();
+
+    // 네트워크 순간 끊김 등으로 스크립트 로드가 실패하면 onYouTubeIframeAPIReady가
+    // 영원히 안 불려서 플레이어 생성 전체가 조용히 멈춰버린다(검은 화면 + 아무 반응
+    // 없음). 그러면 새로고침으로 우연히 성공할 때까지 기다리는 수밖에 없었으므로,
+    // 일정 시간 안에 준비되지 않으면 스스로 한 번 더 시도한다.
+    setTimeout(() => {
+      if (resolved) return;
+      appendScriptTag();
+    }, 5000);
   });
 }
 
