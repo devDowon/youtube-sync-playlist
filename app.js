@@ -501,6 +501,18 @@ onValue(query(queueRef, orderByKey()), (snap) => {
   renderQueue(snap.val());
 });
 
+// 페이지 로딩 직후엔 유튜브 IFrame API 스크립트가 아직 로딩 중일 수 있는데, 그 창
+// 안에 참여하기를 누르면 loadYouTubeAPI()의 전역 콜백(window.onYouTubeIframeAPIReady)이
+// 아직 안정되지 않아 영상이 안 뜨는 문제가 있었다. 그래서 로딩을 페이지 진입과 동시에
+// 미리 시작해두고, 실제로 API 로딩이 끝난 뒤에만(임의의 타이머가 아니라) 버튼을 보여줘서
+// 그 창 안에 클릭 자체가 들어오지 못하게 막는다. 이렇게 하면 참여하기를 누르는 시점엔
+// window.YT가 이미 준비돼 있어서, createPlayer() 내부의 loadYouTubeAPI() 호출도
+// 전역 콜백을 다시 등록하지 않고 즉시 resolve된다.
+loadYouTubeAPI().then(() => {
+  document.getElementById("join-spinner").style.display = "none";
+  document.getElementById("join-btn").hidden = false;
+});
+
 // --- 이벤트 바인딩 ---
 document.getElementById("join-btn").addEventListener("click", async () => {
   document.getElementById("join-overlay").style.display = "none";
