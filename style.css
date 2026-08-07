@@ -1,37 +1,44 @@
 /* ==========================================================================
-   같이 듣기 — 조명을 낮춘 라운지 톤의 다크 UI
-   무채색 대신 아주 옅은 자줏빛을 섞은 중립 스케일 + 단일 로즈 액센트.
+   같이 듣기 — cream / tan / peach 기반의 라이트 UI. sky는 다른 색과 톤이 너무
+   튀어서 빼고 세 색만 쓴다. 텍스트로 쓸 만큼 어두운 색이 없어서, 잉크색만
+   팔레트 밖에서 새로 골랐다(--ink, 따뜻한 다크 브라운). 액센트는 peach 하나만 쓴다.
    ========================================================================== */
 
 :root {
-  color-scheme: dark;
+  color-scheme: light;
 
-  /* --- 표면 스케일 (bg → surface-3 순으로 한 단계씩 밝아짐) --- */
-  --bg: #0f0d12;
-  --bg-sunk: #0a080d;      /* 입력창처럼 "파인" 면 */
-  --surface: #16131b;      /* 카드 */
-  --surface-2: #1d1926;    /* 카드 위 요소 */
-  --surface-3: #262031;    /* hover */
-  --line-soft: #201c29;    /* 같은 카드 안의 구분선 */
-  --line: #2a2434;         /* 카드 경계 */
-  --line-strong: #3a3247;  /* 인터랙티브 요소 경계 */
+  /* --- 원본 팔레트 중 실제로 쓰는 색 (color_palette.txt의 sky는 제외) --- */
+  --peach: #ffbe91;
+  --tan: #ffddb0;
+  --cream: #fffce1;
+  --ink: #3d2b1f; /* 팔레트에 없는 유일한 색: 본문 텍스트용으로 골랐다 */
 
-  /* --- 텍스트 (모두 배경 대비 4.6:1 이상) --- */
-  --text: #f0ecf2;
-  --text-2: #b7aec0;
-  --text-3: #8d8498;
+  /* --- 표면 스케일: sky는 빼고 cream·tan·peach 세 색만 쓴다.
+     카드는 배경보다 살짝 진한 톤, tan은 입력창·보조 버튼 포인트. --- */
+  --bg: var(--cream);
+  --bg-sunk: var(--tan);   /* 입력창처럼 "파인" 면 — 팔레트의 tan 그대로 */
+  --surface: #ece7ce;      /* 카드: 배경보다 살짝 진한 톤 */
+  --surface-2: var(--tan); /* 보조 버튼 같은 포인트 요소 */
+  --surface-3: #eccba2;    /* hover (tan을 살짝 진하게) */
+  --line-soft: rgba(61, 43, 31, 0.15);   /* 같은 카드 안의 구분선 */
+  --line: rgba(61, 43, 31, 0.35);        /* 카드 경계 */
+  --line-strong: rgba(61, 43, 31, 0.5);  /* 인터랙티브 요소 경계 */
 
-  /* --- 액센트: 로즈 한 갈래만 사용 --- */
-  --accent: #ff5d7d;
-  --accent-hi: #ff8098;
-  --accent-lo: #e6456a;
-  --accent-ink: #1c0b11;
-  --accent-tint: rgba(255, 93, 125, 0.12);
-  --accent-tint-2: rgba(255, 93, 125, 0.19);
-  --accent-edge: rgba(255, 93, 125, 0.26);
+  /* --- 텍스트: ink를 기준으로 옅어진다 --- */
+  --text: var(--ink);
+  --text-2: #5a4a3c;
+  --text-3: #817463;
 
-  --live: #5cd6a8;
-  --danger: #ff7061;
+  /* --- 액센트: peach 하나만 쓴다 (주요 버튼·라이브 상태·다이얼 바늘 전부) --- */
+  --accent: var(--peach);
+  --accent-hi: #ecaf86;
+  --accent-lo: #e0a67f;
+  --accent-ink: var(--ink);
+  --accent-tint: rgba(255, 190, 145, 0.28);
+  --accent-tint-2: rgba(255, 190, 145, 0.4);
+  --accent-edge: rgba(255, 190, 145, 0.55);
+
+  --danger: #a8433a;
 
   /* --- 간격: 4px 배수 --- */
   --sp-1: 4px;
@@ -52,14 +59,16 @@
   --r-xl: 20px;
   --r-pill: 999px;
 
-  /* --- 그림자: 큰 blur 하나 대신 얇은 층 + 넓은 층 --- */
-  --sh-1: 0 1px 2px rgba(0, 0, 0, 0.4);
-  --sh-2: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 20px -10px rgba(0, 0, 0, 0.7);
-  --sh-3: 0 2px 4px rgba(0, 0, 0, 0.4), 0 24px 56px -20px rgba(0, 0, 0, 0.85);
+  /* --- 그림자: 최소한만, ink 색으로 톤을 맞춘다. 위계는 주로 표면 톤과 테두리로 만든다 --- */
+  --sh-1: 0 1px 2px rgba(61, 43, 31, 0.14);
+  --sh-2: 0 1px 3px rgba(61, 43, 31, 0.16);
+  --sh-3: 0 4px 16px rgba(61, 43, 31, 0.2);
 
-  /* --- 타이포 --- */
+  /* --- 타이포: 본문은 시스템 산세리프, 수치·라벨은 튜너 눈금처럼 모노스페이스로 --- */
   --font: -apple-system, BlinkMacSystemFont, "Pretendard Variable", Pretendard,
     "Segoe UI", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", "Cascadia Mono", "Roboto Mono", Consolas,
+    "Liberation Mono", monospace, var(--font);
   --fs-2xs: 0.6875rem; /* 11 */
   --fs-xs: 0.75rem;    /* 12 */
   --fs-sm: 0.8125rem;  /* 13 */
@@ -114,18 +123,6 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* 화면 상단의 아주 옅은 무대 조명. 배경이 완전한 평면으로 보이지 않을 만큼만. */
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  background:
-    radial-gradient(105% 60% at 50% -10%, rgba(255, 93, 125, 0.09), transparent 62%),
-    radial-gradient(80% 50% at 88% 4%, rgba(255, 168, 120, 0.045), transparent 60%);
-}
-
 h1,
 h2 {
   margin: 0;
@@ -133,18 +130,17 @@ h2 {
 }
 
 ::selection {
-  background: rgba(255, 93, 125, 0.3);
-  color: #fff;
+  background: rgba(255, 190, 145, 0.45);
+  color: var(--ink);
 }
 
+/* 이 팔레트는 전부 파스텔이라 옅은 accent-hi로는 포커스 링이 잘 안 보인다. 잉크색이 가장 또렷하다. */
 :focus-visible {
-  outline: 2px solid var(--accent-hi);
+  outline: 2px solid var(--ink);
   outline-offset: 2px;
 }
 
 main {
-  position: relative;
-  z-index: 1;
   max-width: 1080px;
   margin: 0 auto;
   padding: var(--sp-8) var(--sp-5) var(--sp-12);
@@ -175,49 +171,44 @@ main {
   letter-spacing: -0.025em;
 }
 
-/* 이퀄라이저 형태의 브랜드 마크 (이모지 대체) */
-.mark {
-  display: flex;
-  align-items: flex-end;
-  gap: 3px;
-  height: 19px;
+/* 브랜드 마크: FM 다이얼 눈금 한 조각. peach 바늘이 "맞춰진" 위치를 가리킨다.
+   이모지 대신 이 앱의 실제 은유(다 같이 한 채널에 튜닝)를 그대로 그린다. */
+/* 브랜드 마크: 다이얼 노브 하나. 눈금을 여러 개 반복하면 바코드처럼 보여서
+   knob + 바늘 하나로 단순화했다. */
+.tuner {
+  position: relative;
   flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: transparent;
+  border: 2px solid var(--ink);
 }
 
-.mark i {
-  display: block;
-  width: 3px;
-  border-radius: var(--r-pill);
+.tuner::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 50%;
+  width: 2px;
+  height: 5px;
+  border-radius: 1px;
   background: var(--accent);
+  transform: translateX(-50%);
 }
 
-.mark i:nth-child(1) {
-  height: 9px;
-  opacity: 0.55;
+.tuner-lg {
+  width: 30px;
+  height: 30px;
+  border-width: 3px;
+  margin: 0 auto;
 }
 
-.mark i:nth-child(2) {
-  height: 19px;
+.tuner-lg::after {
+  top: 5px;
+  width: 3px;
+  height: 8px;
 }
-
-.mark i:nth-child(3) {
-  height: 13px;
-  opacity: 0.78;
-}
-
-.mark-lg {
-  height: 28px;
-  gap: 4px;
-  justify-content: center;
-}
-
-.mark-lg i {
-  width: 4px;
-}
-
-.mark-lg i:nth-child(1) { height: 13px; }
-.mark-lg i:nth-child(2) { height: 28px; }
-.mark-lg i:nth-child(3) { height: 19px; }
 
 #viewer-count {
   display: inline-flex;
@@ -225,11 +216,12 @@ main {
   gap: 7px;
   flex-shrink: 0;
   padding: 5px 12px 5px 10px;
+  font-family: var(--font-mono);
   font-size: var(--fs-sm);
   color: var(--text-2);
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
-  background: var(--surface);
+  background: var(--surface-2);
   border: 1px solid var(--line);
   border-radius: var(--r-pill);
 }
@@ -241,8 +233,8 @@ main {
   height: 6px;
   flex-shrink: 0;
   border-radius: 50%;
-  background: var(--live);
-  box-shadow: 0 0 0 3px rgba(92, 214, 168, 0.15);
+  background: var(--accent);
+  box-shadow: 0 0 0 1px rgba(61, 43, 31, 0.3), 0 0 0 4px var(--accent-tint);
 }
 
 /* ==========================================================================
@@ -324,10 +316,36 @@ main {
 }
 
 .np-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
   font-size: var(--fs-2xs);
   font-weight: 600;
-  letter-spacing: 0.09em;
+  letter-spacing: 0.14em;
   color: var(--text-3);
+}
+
+/* "지금 흐르고 있다"는 상태만 앰버로 표시한다. 로즈는 액션 전용, 앰버는 라이브 전용. */
+.live-dot {
+  display: block;
+  width: 5px;
+  height: 5px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 1px rgba(61, 43, 31, 0.3);
+  animation: live-pulse 2.4s var(--ease) infinite;
+}
+
+@keyframes live-pulse {
+  0% {
+    box-shadow: 0 0 0 1px rgba(61, 43, 31, 0.3), 0 0 0 0 var(--accent-tint);
+  }
+  70%,
+  100% {
+    box-shadow: 0 0 0 1px rgba(61, 43, 31, 0.3), 0 0 0 5px rgba(255, 190, 145, 0);
+  }
 }
 
 #now-playing-title {
@@ -381,7 +399,7 @@ main {
 
 .btn:hover:not(:disabled) {
   background: var(--surface-3);
-  border-color: #453b53;
+  border-color: var(--line-strong);
 }
 
 .btn:active:not(:disabled) {
@@ -413,15 +431,16 @@ main {
 
 /* 처음 들어오면 반드시 눌러야 소리가 나는 버튼이라 액센트를 옅게 얹어 유도한다 */
 .btn-soft {
-  color: var(--accent-hi);
+  /* accent-hi는 이 파스텔 배경 위에서 거의 안 보여서, 텍스트는 잉크색으로 고정한다 */
+  color: var(--ink);
   background: var(--accent-tint);
   border-color: var(--accent-edge);
 }
 
 .btn-soft:hover:not(:disabled) {
-  color: #ff96aa;
+  color: var(--ink);
   background: var(--accent-tint-2);
-  border-color: rgba(255, 93, 125, 0.4);
+  border-color: var(--accent-edge);
 }
 
 .btn-icon::before {
@@ -516,8 +535,8 @@ main {
 
 .field:focus {
   outline: none;
-  background: #100d15;
-  border-color: rgba(255, 93, 125, 0.5);
+  /* 옅은 accent 링만으론 파스텔 배경 위에서 잘 안 보여서 테두리는 잉크색으로 또렷하게 잡는다 */
+  border-color: var(--ink);
   box-shadow: 0 0 0 3px var(--accent-tint);
 }
 
@@ -538,13 +557,26 @@ main {
    ========================================================================== */
 
 #queue-list {
+  position: relative;
   list-style: none;
   margin: 0;
   padding: 0;
   counter-reset: queue;
 }
 
+/* 큐시트 스파인: 순서가 실제 정보인 목록이라 세로선으로 그 사실을 보여준다. 비어 있을 땐 숨긴다. */
+#queue-list:not(:empty)::before {
+  content: "";
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  left: 9.5px;
+  width: 1px;
+  background: var(--line-soft);
+}
+
 #queue-list li {
+  position: relative;
   display: flex;
   align-items: center;
   gap: var(--sp-3);
@@ -558,21 +590,26 @@ main {
 
 #queue-list li::before {
   counter-increment: queue;
-  content: counter(queue);
+  content: counter(queue, decimal-leading-zero);
   flex: 0 0 20px;
   text-align: center;
-  font-size: var(--fs-xs);
+  font-family: var(--font-mono);
+  font-size: var(--fs-2xs);
   font-variant-numeric: tabular-nums;
   color: var(--text-3);
+  background: var(--surface);
 }
 
-/* 바로 다음에 재생될 곡만 살짝 앞으로 */
+/* 바로 다음에 재생될 곡: 로즈(액션)가 아니라 앰버(라이브)로 — 지금 켜질 채널이라는 뜻 */
 #queue-list li:first-child::before {
-  color: var(--accent);
+  color: var(--accent-ink);
+  background: var(--accent);
+  border-radius: 3px;
 }
 
 #queue-list li:first-child > span {
   color: var(--text);
+  font-weight: 600;
 }
 
 #queue-list li > span {
@@ -607,8 +644,8 @@ main {
 
 .queue-delete-btn:hover {
   color: var(--danger);
-  background: rgba(255, 112, 97, 0.1);
-  border-color: rgba(255, 112, 97, 0.24);
+  background: rgba(168, 67, 58, 0.12);
+  border-color: rgba(168, 67, 58, 0.28);
 }
 
 .queue-delete-btn:active {
@@ -667,19 +704,6 @@ main {
   height: clamp(280px, 44vh, 440px);
 }
 
-/* 스크롤 영역 위쪽 경계를 부드럽게 (내용이 잘린다는 신호) */
-.chat-body::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 20px;
-  z-index: 1;
-  pointer-events: none;
-  background: linear-gradient(var(--surface), rgba(22, 19, 27, 0));
-}
-
 #chat-list {
   height: 100%;
   margin: 0;
@@ -707,7 +731,7 @@ main {
 }
 
 #chat-list::-webkit-scrollbar-thumb:hover {
-  background: #4a4059;
+  background: rgba(61, 43, 31, 0.5);
   background-clip: padding-box;
 }
 
@@ -762,26 +786,20 @@ main {
   display: grid;
   place-items: center;
   padding: var(--sp-6);
-  background:
-    radial-gradient(70% 55% at 50% 42%, rgba(38, 22, 32, 0.62), rgba(6, 5, 9, 0.9));
-  -webkit-backdrop-filter: blur(10px) saturate(1.1);
-  backdrop-filter: blur(10px) saturate(1.1);
+  background: rgba(61, 43, 31, 0.4);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
 }
 
 #join-card {
   width: min(360px, 100%);
   padding: var(--sp-8) var(--sp-8) var(--sp-6);
   text-align: center;
-  /* 위에서 빛이 오는 방향과 맞춘 아주 옅은 표면 그라데이션 */
-  background: linear-gradient(180deg, var(--surface-2), var(--surface) 62%);
+  background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--r-xl);
   box-shadow: var(--sh-3);
   animation: join-in var(--dur-3) var(--ease-out) both;
-}
-
-#join-card .mark {
-  margin: 0 auto;
 }
 
 .join-title {
@@ -798,25 +816,56 @@ main {
   color: var(--text-2);
 }
 
+/* 채널을 찾는 중이라는 뜻의 튜닝 바. 원형 스피너 대신 다이얼 은유를 그대로 이어간다. */
 #join-spinner {
-  width: 26px;
-  height: 26px;
-  margin: var(--sp-6) auto var(--sp-1);
-  border: 2px solid var(--line-strong);
-  border-top-color: var(--accent);
-  border-radius: 50%;
-  animation: join-spin 0.8s linear infinite;
+  position: relative;
+  width: 120px;
+  height: 3px;
+  margin: var(--sp-6) auto var(--sp-2);
+  background: repeating-linear-gradient(
+    90deg,
+    var(--line-strong) 0,
+    var(--line-strong) 1px,
+    transparent 1px,
+    transparent 7px
+  );
+  border-radius: var(--r-pill);
+  overflow: hidden;
+}
+
+#join-spinner::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 10px;
+  height: 100%;
+  background: var(--accent);
+  animation: tuning-sweep 1.15s ease-in-out infinite;
+}
+
+#join-card .tuning-label {
+  margin: 0 0 var(--sp-6);
+  font-family: var(--font-mono);
+  font-size: var(--fs-2xs);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-3);
 }
 
 #join-btn {
-  margin-top: var(--sp-6);
+  margin-top: var(--sp-2);
   /* 로딩이 끝나 버튼이 나타나는 순간을 설명하는 등장 모션 */
   animation: rise-in var(--dur-2) var(--ease-out) both;
 }
 
-@keyframes join-spin {
-  to {
-    transform: rotate(360deg);
+@keyframes tuning-sweep {
+  0% {
+    transform: translateX(-10px);
+  }
+  100% {
+    transform: translateX(120px);
   }
 }
 
@@ -899,9 +948,14 @@ main {
     transition-duration: 0.01ms !important;
   }
 
-  /* 스피너는 "로딩 중"이라는 정보 자체라서 속도만 늦춘다 */
-  #join-spinner {
-    animation-duration: 1.6s !important;
+  /* 튜닝 바는 "로딩 중"이라는 정보 자체라서 속도만 늦춘다 */
+  #join-spinner::after {
+    animation-duration: 2.2s !important;
+    animation-iteration-count: infinite !important;
+  }
+
+  .live-dot {
+    animation-duration: 2.4s !important;
     animation-iteration-count: infinite !important;
   }
 }

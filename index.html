@@ -3,19 +3,20 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<meta name="color-scheme" content="dark" />
-<meta name="theme-color" content="#0f0d12" />
+<meta name="color-scheme" content="light" />
+<meta name="theme-color" content="#fffce1" />
 <title>같이 듣기</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23181420'/%3E%3Cg fill='%23ff5d7d'%3E%3Crect x='9' y='13' width='3' height='7' rx='1.5' opacity='.6'/%3E%3Crect x='14.5' y='9' width='3' height='14' rx='1.5'/%3E%3Crect x='20' y='11.5' width='3' height='10' rx='1.5' opacity='.8'/%3E%3C/g%3E%3C/svg%3E" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23ffddb0'/%3E%3Crect x='6' y='14' width='20' height='4' rx='2' fill='%233d2b1f' opacity='.25'/%3E%3Crect x='17' y='11' width='3' height='10' rx='1.5' fill='%23ffbe91'/%3E%3C/svg%3E" />
 <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div id="join-overlay" role="dialog" aria-modal="true" aria-labelledby="join-title">
     <div id="join-card">
-      <span class="mark mark-lg" aria-hidden="true"><i></i><i></i><i></i></span>
+      <div class="tuner tuner-lg" aria-hidden="true"></div>
       <h2 id="join-title" class="join-title">같이 듣기</h2>
       <p>브라우저 자동재생 제한 때문에 한 번 눌러야 재생이 시작돼요.</p>
       <div id="join-spinner" role="status" aria-label="준비 중"></div>
+      <p class="tuning-label" aria-hidden="true">채널 맞추는 중</p>
       <button id="join-btn" class="btn btn-primary btn-block" hidden>참여하기</button>
     </div>
   </div>
@@ -23,7 +24,7 @@
   <main>
     <header class="app-header">
       <div class="brand">
-        <span class="mark" aria-hidden="true"><i></i><i></i><i></i></span>
+        <div class="tuner" aria-hidden="true"></div>
         <h1>같이 듣기</h1>
       </div>
       <div id="viewer-count">접속자 수 확인 중…</div>
@@ -39,7 +40,7 @@
 
           <div class="stage-bar">
             <div id="now-playing-info">
-              <span class="np-label">현재 곡</span>
+              <span class="np-label"><i class="live-dot" aria-hidden="true"></i>ON AIR</span>
               <span id="now-playing-title" aria-live="polite">재생 중인 곡 없음</span>
             </div>
 

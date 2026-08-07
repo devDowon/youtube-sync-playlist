@@ -1,0 +1,5 @@
+--dusk-blue: #3d5a80ff;
+--powder-blue: #98c1d9ff;
+--light-cyan: #e0fbfcff;
+--burnt-peach: #ee6c4dff;
+--jet-black: #293241ff;
