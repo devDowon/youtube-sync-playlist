@@ -16,7 +16,16 @@ let currentQueueId = null;
 let allVotes = {};
 let skipping = false;
 let connected = false;
+let joined = false;
 let voteDisconnect = null;
+
+// 익명 로그인이 authReady로 늦게 끝나더라도 그 사이의 클릭을 놓치지 않도록,
+// 리스너 자체는 로그인 완료와 무관하게 먼저 붙여 top-level joined 플래그만 세워둔다.
+document.getElementById("join-btn").addEventListener("click", () => {
+  joined = true;
+  onJoined();
+});
+let onJoined = () => {};
 
 // presence/skipVotes 쓰기 규칙이 auth.uid === $clientId를 요구하므로,
 // 익명 로그인이 끝나 uid가 확정된 뒤에야 clientId를 정하고 나머지 로직을 시작한다.
@@ -39,12 +48,20 @@ authReady.then((clientId) => {
     }
   }
 
+  // "참여하기"를 눌러 실제로 같이 듣기 시작한 사람만 presence(=과반수 분모)에
+  // 잡히도록, 연결 여부와 별개로 join 여부도 함께 확인한다.
+  function updatePresence() {
+    if (!connected || !joined) return;
+    set(myPresenceRef, true);
+    onDisconnect(myPresenceRef).remove();
+  }
+  onJoined = updatePresence;
+
   // --- 접속자 수 (presence) ---
   onValue(ref(db, ".info/connected"), (snap) => {
     connected = snap.val() === true;
     if (!connected) return;
-    set(myPresenceRef, true);
-    onDisconnect(myPresenceRef).remove();
+    updatePresence();
     updateVoteDisconnect();
   });
 
@@ -68,8 +85,10 @@ authReady.then((clientId) => {
     render();
   });
 
+  // 과반(+1)이 아니라 절반을 버림한 값을 기준으로 한다. 다만 viewerCount가
+  // 0/1일 때 결과가 0이 되면 투표 없이도 즉시 스킵되어 버리므로 최소 1은 보장한다.
   function majorityThreshold() {
-    return Math.floor(Math.max(viewerCount, 1) / 2) + 1;
+    return Math.max(1, Math.floor(viewerCount / 2));
   }
 
   function currentVotes() {
